@@ -48,9 +48,13 @@ module LinkmapIos
       result[:detail].sort_by { |h| h[:size] }.reverse.each do |lib|
         report << "#{lib[:library]}   #{Filesize.from(lib[:size].to_s + 'B').pretty}\n"
       end
-      report << "\n# Object detail\n"
-      @id_map.each_value do |id_info|
-        report << "#{id_info[:object]}   #{Filesize.from(id_info[:size].to_s + 'B').pretty}\n"
+
+      @id_map.values.group_by { |i| i.fetch(:library, 'Unknown') }.each do |library, entries|
+        report << "\nLibrary Details - #{library}\n"
+
+        entries.sort_by { |i| i.fetch(:size, 0) }.reverse.each do |id_info|
+          report << "#{id_info[:object]}   #{Filesize.from(id_info[:size].to_s + 'B').pretty}\n"
+        end
       end
 
       report << "# Uncounted Section Detail"
